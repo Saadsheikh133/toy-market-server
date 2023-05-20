@@ -31,9 +31,14 @@ async function run() {
     const toyCollection = client.db('toyDB').collection('toys');
     const addToyCollection = client.db('toyDB').collection('addToys');
 
-      app.get('/toys', async(req, res) => {
-          const result = await toyCollection.find().toArray()
-          res.send(result)
+    app.get('/toys', async (req, res) => {
+      let query = {};
+      if (req.query?.category) {
+        query = {sub_category: req.query.category}
+      }
+          const result = await toyCollection.find(query).toArray()
+      res.send(result)
+      console.log(req.query);
       })
 
     app.post('/addToys', async(req, res) => {
@@ -50,6 +55,22 @@ async function run() {
       const result = await addToyCollection.find(query).toArray();
       res.send(result);
     });
+
+    app.put('/addToys/:id', async(req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateToy = {
+        $set: {
+          price: body.price,
+          quantity: body.quantity,
+          details: body.details
+        }
+      }
+      const result = await addToyCollection.updateOne(filter, options, updateToy);
+      res.send(result)
+    })
 
     app.delete('/addToys/:id', async(req, res) => {
       const id = req.params.id;
