@@ -104,6 +104,16 @@ async function run() {
      }
     })
 
+    app.get('/allToys/:text', async (req, res) => {
+      if (req.params.text == "ascending" || req.params.text == "descending") {
+        const result = await toyCollection.find({ price: req.params.text }).sort({ createAt: 1 }).toArray();
+        return res.send(result);
+      }
+
+      const result = await toyCollection.find({}).sort({ createAt: -1 }).toArray();
+      res.send(result)
+    })
+
     app.put("/addToys/:id", async (req, res) => {
      try {
        const id = req.params.id;
