@@ -29,85 +29,110 @@ async function run() {
       await client.connect();
       
     const toyCollection = client.db('toyDB').collection('toys');
-    // const addToyCollection = client.db('toyDB').collection('addToys');
 
     const indexKeys = { toyName: 1 };
     const indexOptions = { name: 'toyName' };
     const result = await toyCollection.createIndex(indexKeys, indexOptions);
 
     app.get('/searchByToyName/:text', async(req, res) => {
-      const searchText = req.params.text;
-
-      const result = await toyCollection
-        .find({ toyName: { $regex: searchText, $options: "i" } })
-        .toArray();
-      res.send(result)
+      try {
+        const searchText = req.params.text;
+        const result = await toyCollection
+          .find({ toyName: { $regex: searchText, $options: "i" } })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        res.send(error)
+      }
     })
 
     app.get('/toys', async (req, res) => {
-      let query = {};
-      if (req.query?.sub_category) {
-        query = {sub_category: req.query.sub_category}
+      try {
+        let query = {};
+        if (req.query?.sub_category) {
+          query = { sub_category: req.query.sub_category };
+        }
+        const result = await toyCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        res.send(error)
       }
-          const result = await toyCollection.find(query).toArray()
-      res.send(result)
     })
     
     app.get('/toys/:id', async(req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
-      const result = await toyCollection.findOne(filter)
-      res.send(result)
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const result = await toyCollection.findOne(filter);
+        res.send(result);
+      } catch (error) {
+        res.send(error)
+      }
     })
 
     app.post('/createToys', async(req, res) => {
-      const body = req.body;
-      const result = await toyCollection.insertOne(body);
-      res.send(result);
+      try {
+        const body = req.body;
+        const result = await toyCollection.insertOne(body);
+        res.send(result);
+      } catch (error) {
+        res.send(error)
+      }
     })
 
     app.get("/allToys", async (req, res) => {
-      let query = {};
-      if (req.query?.email) {
-        query = { email: req.query.email };
-      }
-      const result = await toyCollection.find(query).toArray();
-      res.send(result);
+     try {
+       let query = {};
+       if (req.query?.email) {
+         query = { sellerEmail: req.query.email };
+       }
+       const result = await toyCollection.find(query).toArray();
+       res.send(result);
+     } catch (error) {
+      res.send(error)
+     }
     });
 
     app.get('/allToys/:id', async(req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
-      const result = await toyCollection.findOne(filter)
-      res.send(result)
+     try {
+       const id = req.params.id;
+       const filter = { _id: new ObjectId(id) };
+       const result = await toyCollection.findOne(filter);
+       res.send(result);
+     } catch (error) {
+      res.send(error)
+     }
     })
 
     app.put("/addToys/:id", async (req, res) => {
-      const id = req.params.id;
-      const body = req.body;
-      console.log(body)
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updateToy = {
-        $set: {
-          price: body.price,
-          quantity: body.quantity,
-          details: body.details,
-        },
-      };
-      const result = await toyCollection.updateOne(
-        filter,
-        updateToy,
-        options
-      );
-      res.send(result);
+     try {
+       const id = req.params.id;
+       const body = req.body;
+       const filter = { _id: new ObjectId(id) };
+       const options = { upsert: true };
+       const updateToy = {
+         $set: {
+           price: body.price,
+           quantity: body.quantity,
+           details: body.details,
+         },
+       };
+       const result = await toyCollection.updateOne(filter, updateToy, options);
+       res.send(result);
+     } catch (error) {
+      res.send(error)
+     }
     });
 
     app.delete('/addToys/:id', async(req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await toyCollection.deleteOne(query);
-      res.send(result)
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await toyCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        res.send(error)
+      }
     })
 
     // Send a ping to confirm a successful connection
