@@ -46,12 +46,19 @@ async function run() {
 
     app.get('/toys', async (req, res) => {
       let query = {};
-      if (req.query?.category) {
-        query = {sub_category: req.query.category}
+      if (req.query?.sub_category) {
+        query = {sub_category: req.query.sub_category}
       }
           const result = await toyCollection.find(query).toArray()
       res.send(result)
-      })
+    })
+    
+    app.get('/toys/:id', async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const result = await toyCollection.findOne(filter)
+      res.send(result)
+    })
 
     app.post('/createToys', async(req, res) => {
       const body = req.body;
@@ -68,9 +75,17 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/allToys/:id', async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const result = await toyCollection.findOne(filter)
+      res.send(result)
+    })
+
     app.put("/addToys/:id", async (req, res) => {
       const id = req.params.id;
       const body = req.body;
+      console.log(body)
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updateToy = {
@@ -82,8 +97,8 @@ async function run() {
       };
       const result = await toyCollection.updateOne(
         filter,
-        options,
-        updateToy
+        updateToy,
+        options
       );
       res.send(result);
     });
