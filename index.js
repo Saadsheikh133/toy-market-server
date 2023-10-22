@@ -26,13 +26,11 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-       client.connect();
+      
       
     const toyCollection = client.db('toyDB').collection('toys');
+    const reviewCollection = client.db('toyDB').collection('reviews');
 
-    const indexKeys = { toyName: 1 };
-    const indexOptions = { name: 'toyName' };
-    const result = await toyCollection.createIndex(indexKeys, indexOptions);
 
     app.get('/searchByToyName/:text', async(req, res) => {
       try {
@@ -104,13 +102,13 @@ async function run() {
      }
     })
 
-    app.get('/allToys/:text', async (req, res) => {
+    app.get('/myToys/:text', async (req, res) => {
       if (req.params.text == "ascending" || req.params.text == "descending") {
-        const result = await toyCollection.find({ price: req.params.text }).sort({ createAt: 1 }).toArray();
+        const result = await toyCollection.find({ price: req.params.text }).toArray();
         return res.send(result);
       }
 
-      const result = await toyCollection.find({}).sort({ createAt: -1 }).toArray();
+      const result = await toyCollection.find({}).toArray();
       res.send(result)
     })
 
@@ -145,8 +143,20 @@ async function run() {
       }
     })
 
+    // review api section
+    app.post('/addReview', async(req, res) => {
+      const body = req.body;
+      const result = await reviewCollection.insertOne(body);
+      res.send(result);
+    });
+
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
